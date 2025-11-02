@@ -12,14 +12,15 @@ const {
   videoReferenceRoute,
   youtubeRoutes,
   imageRoutes,
-  googleRoute
+  googleRoute,
 } = require("./src/routes/index.route");
 
 // modelos
 const {
   Usuario,
   Historial,
-  VideoReferencia
+  VideoReferencia,
+  CodigoVerificacion
 } = require("./src/models/index.model");
 
 // relaciones
@@ -47,6 +48,8 @@ app.use("/api/referencias", validarToken, videoReferenceRoute);
 app.use("/api/youtube", validarToken, youtubeRoutes);
 app.use("/api/images", validarToken, imageRoutes);
 
+// app.use("/api/codigo", codeRoute);
+
 //router.post("/auth/google", googleRoute);
 
 sequelize
@@ -55,6 +58,7 @@ sequelize
     await Usuario.sync();
     await Historial.sync();
     await VideoReferencia.sync();
+    await CodigoVerificacion.sync();
 
     asignarRelaciones()
     console.log("base de datos sincronizada");
