@@ -1,18 +1,17 @@
-const { where } = require("sequelize");
+// const { where } = require("sequelize");
 const Usuario = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 
 const crearUsuario = async (req, res) => {
     try {
         const { nombres, correoElectronico, contraseña } = req.body;
-
         // campos requeridos
         if (!nombres || !correoElectronico || !contraseña) {
             return res
                 .status(400)
                 .json({ success: false, message: "Faltan campos requeridos" });
         }
-
+        /* VERFICACIONES QUE SE REALIZAN A NIVEL DE APLICACION
         // formato correo
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(correoElectronico)) {
@@ -20,16 +19,6 @@ const crearUsuario = async (req, res) => {
                 .status(400)
                 .json({ success: false, message: "Formato de correo inválido" });
         }
-
-        // existencia de correo
-        const existe = await Usuario.findOne({ where: { correoElectronico } });
-        if (existe) {
-            return res.status(400).json({
-                success: false,
-                message: "Ya existe un usuario con ese correo",
-            });
-        }
-
         // contraseña fuerte
         const regex = /^(?=.*[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]).{8,}$/;
         if (!regex.test(contraseña)) {
@@ -38,15 +27,21 @@ const crearUsuario = async (req, res) => {
                 message:
                     "La contraseña debe tener al menos 8 caracteres y un carácter especial.",
             });
+        }*/
+        // existencia de correo
+        const existe = await Usuario.findOne({ where: { correoElectronico } });
+        if (existe) {
+            return res.status(400).json({
+                success: false,
+                message: "Este correo ya se encuentra registrado",
+            });
         }
-
-        // 5) Encriptar contraseña
+        // Encriptado de contraseña
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(contraseña, salt);
         req.body.contraseña = hashedPassword;
         const usuario = await Usuario.create(req.body);
-
-        // Evitar enviar la contraseña, ni siquiera encriptada, en la respuesta
+        // Evitar enviar la contraseña, ni siquiera encriptada
         usuario.contraseña = undefined;
         res.status(200).json({
             success: true,
@@ -60,7 +55,6 @@ const crearUsuario = async (req, res) => {
         });
     }
 };
-
 
 const encontrarUsuarios = async (req, res) => {
     try {
