@@ -28,6 +28,14 @@ const asignarRelaciones = require("./src/models/relations");
 
 // middlewares
 const app = express();
+app.set("trust proxy", 1); // Confía en el primer proxy (por ejemplo Cloudflare o Nginx)
+/*
+    express-rate-limit usa la IP del cliente (req.ip) para contar solicitudes.
+    Si la app corre detrás de un proxy o túnel, Express recibe una IP "falsa" del proxy (por ejemplo, 127.0.0.1).
+    El proxy envía la IP real del cliente en el header X-Forwarded-For.
+    Pero Express no confía en ese header por defecto (trust proxy = false).
+    Entonces express-rate-limit detecta que hay un X-Forwarded-For, pero no puede usarlo → lanza ese error.
+*/
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
@@ -47,9 +55,6 @@ app.use("/api/historiales", validarToken, recordRoute);
 app.use("/api/referencias", validarToken, videoReferenceRoute);
 app.use("/api/youtube", validarToken, youtubeRoutes);
 app.use("/api/images", validarToken, imageRoutes);
-
-// app.use("/api/codigo", codeRoute);
-
 //router.post("/auth/google", googleRoute);
 
 sequelize
