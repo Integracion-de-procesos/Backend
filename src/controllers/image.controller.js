@@ -101,5 +101,4 @@ module.exports = {
     subirImagen,
     encontrarImagen,
     eliminarImagen,
-    actualizarImagen
 };
