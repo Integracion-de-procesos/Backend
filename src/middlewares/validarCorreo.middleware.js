@@ -30,13 +30,13 @@ exports.verificarCodigo = async (req, res, next) => {
 
         const registro = await CodigoVerificacion.findOne({ where: { correoElectronico } });
         if (!registro)
-            return res.status(404).json({ success: false, message: "No se encontró código" });
+            return res.status(404).json({ success: false, message: "No se encontró el código" });
         if (registro.verificado)
-            return res.status(400).json({ success: false, message: "Código ya usado" });
+            return res.status(400).json({ success: false, message: "Este codigo ya ha sido utilizado" });
         if (new Date() > registro.expira)
-            return res.status(400).json({ success: false, message: "Código expirado" });
+            return res.status(400).json({ success: false, message: "Este codigo ya ha expirado" });
         if (registro.codigo !== codigo)
-            return res.status(400).json({ success: false, message: "Código incorrecto" });
+            return res.status(400).json({ success: false, message: "El codigo proporcionado es incorrecto" });
         registro.verificado = true;
         await registro.save();
 
