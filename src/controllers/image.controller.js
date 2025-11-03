@@ -97,6 +97,10 @@ const eliminarImagen = async (req, res) => {
     }
 };
 
+const path = require("path");
+const fs = require("fs");
+const { Usuario, Imagen } = require("../models");
+
 const actualizarImagen = async (req, res) => {
     try {
         const { idUsuario } = req.body;
@@ -113,32 +117,35 @@ const actualizarImagen = async (req, res) => {
                 .status(404)
                 .json({ success: false, message: "No se encontró el usuario" });
         }
-
+        // Imagen previa?
         const imagenAnterior = await Imagen.findOne({ where: { idUsuario } });
-
-        if (imagenAnterior) {
-            // Borrar archivo físico anterior si existe
-            if (fs.existsSync(imagenAnterior.ruta)) {
-                fs.unlinkSync(imagenAnterior.ruta);
-            }
-            // Eliminar registro de la imagen anterior
-            await Imagen.destroy({ where: { idUsuario } });
-        }
-        // Nuevo nombre y ruta
+        // Generar nuevo nombre y ruta de destino
         const nombreArchivo = `IMG_${idUsuario}${path.extname(req.file.originalname)}`;
         const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
 
+        // Si ya existía una imagen, eliminar archivo físico y registro anterior
+        if (imagenAnterior) {
+            if (fs.existsSync(imagenAnterior.ruta)) {
+                fs.unlinkSync(imagenAnterior.ruta);
+            }
+            await Imagen.destroy({ where: { idUsuario } });
+        }
+        // Mover el nuevo archivo al destino final
         fs.renameSync(req.file.path, rutaDestino);
-
+        // Crear nuevo registro (ya sea actualización o creación)
         await Imagen.create({
             idUsuario,
             nombreArchivo,
             ruta: rutaDestino,
         });
+        // Definir el mensaje según el caso
+        const mensaje = imagenAnterior
+            ? "Imagen actualizada correctamente"
+            : "Imagen creada correctamente";
 
         return res.status(200).json({
             success: true,
-            message: "Imagen actualizada correctamente",
+            message: mensaje,
             nombreArchivo,
         });
     } catch (error) {
@@ -146,6 +153,9 @@ const actualizarImagen = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+module.exports = { actualizarImagen };
+
 
 module.exports = {
     subirImagen,
