@@ -22,40 +22,12 @@ const subirImagen = async (req, res) => {
                 message: "No se encontró el usuario",
             });
         }
-        const imagenExistente = await Imagen.findOne({ where: { idUsuario } });
-        if (imagenExistente) {
-            if (fs.existsSync(imagenExistente.ruta)) {
-                fs.unlinkSync(imagenExistente.ruta);
-            }
-            // Eliminar registro en la base de datos
-            await Imagen.destroy({ where: { idUsuario } });
-        }
         const nombreArchivo = `IMG_${idUsuario}${path.extname(req.file.originalname)}`;
         const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
-        if (!fs.existsSync(path.join(__dirname, "..", "uploads"))) {
-            fs.mkdirSync(path.join(__dirname, "..", "uploads"));
-        }
         fs.renameSync(req.file.path, rutaDestino);
-        await Imagen.create({
-            idUsuario,
-            nombreArchivo,
-            ruta: rutaDestino,
-        });
-
-        res.status(201).json({
-            success: true,
-            message: imagenExistente
-                ? "Imagen actualizada correctamente"
-                : "Imagen subida correctamente",
-            nombreArchivo,
-        });
-    } catch (error) {
-        console.error("Error en subirImagen:", error);
-        res.status(500).json({
-            success: false,
-            message: error.message || "Error al subir la imagen",
-        });
-    }
+        await Imagen.create({ idUsuario, nombreArchivo, ruta: rutaDestino, });
+        res.status(201).json({ success: true, message: "Imagen subida correctamente", });
+    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
 };
 
 const encontrarImagen = async (req, res) => {
