@@ -11,9 +11,8 @@ const {
 const upload = multer({ dest: path.join(__dirname, "..", "uploads_temp") });
 const router = express.Router();
 
-router.post("/subir", upload.single("image"), subirImagen);
+router.put("/", upload.single("image"), actualizarImagen);
 router.get("/:idUsuario", encontrarImagen);
-router.put("/:idUsuario", actualizarImagen);
 router.delete("/:idUsuario", eliminarImagen);
 
 module.exports = router;

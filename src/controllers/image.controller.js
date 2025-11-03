@@ -97,10 +97,6 @@ const eliminarImagen = async (req, res) => {
     }
 };
 
-const path = require("path");
-const fs = require("fs");
-const { Usuario, Imagen } = require("../models");
-
 const actualizarImagen = async (req, res) => {
     try {
         const { idUsuario } = req.body;
