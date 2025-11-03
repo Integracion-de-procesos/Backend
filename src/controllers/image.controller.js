@@ -97,62 +97,6 @@ const eliminarImagen = async (req, res) => {
     }
 };
 
-const actualizarImagen = async (req, res) => {
-    try {
-        const { idUsuario } = req.body;
-        if (!req.file) {
-            return res.status(400).json({
-                success: false,
-                message: "No se subió ninguna imagen nueva",
-            });
-        }
-        const usuario = await Usuario.findByPk(idUsuario);
-        if (!usuario) {
-            fs.unlinkSync(req.file.path);
-            return res
-                .status(404)
-                .json({ success: false, message: "No se encontró el usuario" });
-        }
-        // Imagen previa?
-        const imagenAnterior = await Imagen.findOne({ where: { idUsuario } });
-        // Generar nuevo nombre y ruta de destino
-        const nombreArchivo = `IMG_${idUsuario}${path.extname(req.file.originalname)}`;
-        const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
-
-        // Si ya existía una imagen, eliminar archivo físico y registro anterior
-        if (imagenAnterior) {
-            if (fs.existsSync(imagenAnterior.ruta)) {
-                fs.unlinkSync(imagenAnterior.ruta);
-            }
-            await Imagen.destroy({ where: { idUsuario } });
-        }
-        // Mover el nuevo archivo al destino final
-        fs.renameSync(req.file.path, rutaDestino);
-        // Crear nuevo registro (ya sea actualización o creación)
-        await Imagen.create({
-            idUsuario,
-            nombreArchivo,
-            ruta: rutaDestino,
-        });
-        // Definir el mensaje según el caso
-        const mensaje = imagenAnterior
-            ? "Imagen actualizada correctamente"
-            : "Imagen creada correctamente";
-
-        return res.status(200).json({
-            success: true,
-            message: mensaje,
-            nombreArchivo,
-        });
-    } catch (error) {
-        console.error("Error en actualizarImagen:", error);
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
-module.exports = { actualizarImagen };
-
-
 module.exports = {
     subirImagen,
     encontrarImagen,
