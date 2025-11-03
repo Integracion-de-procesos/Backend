@@ -11,7 +11,6 @@ const subirImagen = async (req, res) => {
                 message: "No se subió ninguna imagen",
             });
         }
-
         const { idUsuario } = req.body;
         const usuario = await Usuario.findByPk(idUsuario);
 
@@ -98,8 +97,59 @@ const eliminarImagen = async (req, res) => {
     }
 };
 
+const actualizarImagen = async (req, res) => {
+    try {
+        const { idUsuario } = req.body;
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "No se subió ninguna imagen nueva",
+            });
+        }
+        const usuario = await Usuario.findByPk(idUsuario);
+        if (!usuario) {
+            fs.unlinkSync(req.file.path);
+            return res
+                .status(404)
+                .json({ success: false, message: "No se encontró el usuario" });
+        }
+
+        const imagenAnterior = await Imagen.findOne({ where: { idUsuario } });
+
+        if (imagenAnterior) {
+            // Borrar archivo físico anterior si existe
+            if (fs.existsSync(imagenAnterior.ruta)) {
+                fs.unlinkSync(imagenAnterior.ruta);
+            }
+            // Eliminar registro de la imagen anterior
+            await Imagen.destroy({ where: { idUsuario } });
+        }
+        // Nuevo nombre y ruta
+        const nombreArchivo = `IMG_${idUsuario}${path.extname(req.file.originalname)}`;
+        const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
+
+        fs.renameSync(req.file.path, rutaDestino);
+
+        await Imagen.create({
+            idUsuario,
+            nombreArchivo,
+            ruta: rutaDestino,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Imagen actualizada correctamente",
+            nombreArchivo,
+        });
+    } catch (error) {
+        console.error("Error en actualizarImagen:", error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     subirImagen,
     encontrarImagen,
     eliminarImagen,
+    actualizarImagen
 };
