@@ -11,28 +11,31 @@ const subirImagen = async (req, res) => {
                 message: "No se subió ninguna imagen",
             });
         }
+
         const { idUsuario } = req.body;
+
         const usuario = await Usuario.findByPk(idUsuario);
-
         if (!usuario) {
-            // Borrar el archivo si el usuario no existe
             fs.unlinkSync(req.file.path);
-            return res
-                .status(404)
-                .json({ success: false, message: "No se encontró el usuario" });
+            return res.status(404).json({
+                success: false,
+                message: "No se encontró el usuario",
+            });
         }
-        // Esta parte extrae el formato original de la imagen que se sube (jpg, png)
+        const imagenExistente = await Imagen.findOne({ where: { idUsuario } });
+        if (imagenExistente) {
+            if (fs.existsSync(imagenExistente.ruta)) {
+                fs.unlinkSync(imagenExistente.ruta);
+            }
+            // Eliminar registro en la base de datos
+            await Imagen.destroy({ where: { idUsuario } });
+        }
         const nombreArchivo = `IMG_${idUsuario}${path.extname(req.file.originalname)}`;
-        /* 
-            Definicion de la ruta completa en donde la img se gurdara
-            uploads: Carpeta donde se almacenaran las imagenes
-            nombreArchivo: Nombre del archivo que se acaba de crear
-        */
         const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
-        // Mover el archivo subido al destino final
+        if (!fs.existsSync(path.join(__dirname, "..", "uploads"))) {
+            fs.mkdirSync(path.join(__dirname, "..", "uploads"));
+        }
         fs.renameSync(req.file.path, rutaDestino);
-
-        // Guardar registro en la base de datos
         await Imagen.create({
             idUsuario,
             nombreArchivo,
@@ -41,10 +44,17 @@ const subirImagen = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: "Imagen subida correctamente",
+            message: imagenExistente
+                ? "Imagen actualizada correctamente"
+                : "Imagen subida correctamente",
+            nombreArchivo,
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("Error en subirImagen:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Error al subir la imagen",
+        });
     }
 };
 
