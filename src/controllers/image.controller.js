@@ -3,10 +3,6 @@ const path = require("path");
 const Usuario = require("../models/user.model");
 const Imagen = require("../models/image.model");
 
-const fs = require("fs");
-const path = require("path");
-const { Usuario, Imagen } = require("../models");
-
 const subirImagen = async (req, res) => {
     try {
         if (!req.file) {
