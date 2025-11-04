@@ -46,6 +46,7 @@ const subirImagen = async (req, res) => {
         return res.status(201).json({
             success: true,
             message: "Imagen subida correctamente",
+            data: nombreArchivo
         });
     } catch (error) {
         console.error("Error al subir imagen:", error);
