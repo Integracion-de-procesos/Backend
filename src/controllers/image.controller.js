@@ -3,6 +3,10 @@ const path = require("path");
 const Usuario = require("../models/user.model");
 const Imagen = require("../models/image.model");
 
+const fs = require("fs");
+const path = require("path");
+const { Usuario, Imagen } = require("../models");
+
 const subirImagen = async (req, res) => {
     try {
         if (!req.file) {
@@ -11,9 +15,7 @@ const subirImagen = async (req, res) => {
                 message: "No se subió ninguna imagen",
             });
         }
-
         const { idUsuario } = req.body;
-
         const usuario = await Usuario.findByPk(idUsuario);
         if (!usuario) {
             fs.unlinkSync(req.file.path);
@@ -22,13 +24,37 @@ const subirImagen = async (req, res) => {
                 message: "No se encontró el usuario",
             });
         }
+
+        const imagenPrev = await Imagen.findOne({ where: { idUsuario } });
+        if (imagenPrev) {
+            if (fs.existsSync(imagenPrev.ruta)) {
+                fs.unlinkSync(imagenPrev.ruta);
+            }
+            await imagenPrev.destroy();
+        }
+
         const nombreArchivo = `IMG_${idUsuario}${path.extname(req.file.originalname)}`;
         const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
         fs.renameSync(req.file.path, rutaDestino);
-        await Imagen.create({ idUsuario, nombreArchivo, ruta: rutaDestino, });
-        res.status(201).json({ success: true, message: "Imagen subida correctamente", });
-    } catch (error) { res.status(500).json({ success: false, message: error.message }); }
+        await Imagen.create({
+            idUsuario,
+            nombreArchivo,
+            ruta: rutaDestino,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: "Imagen subida correctamente",
+        });
+    } catch (error) {
+        console.error("Error al subir imagen:", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        });
+    }
 };
+
 
 const encontrarImagen = async (req, res) => {
     try {
