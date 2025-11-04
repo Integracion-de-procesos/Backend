@@ -46,7 +46,7 @@ app.listen(3000, () => {
   console.log("escuchando en el puerto 3000");
 });
 
-// endpoints
+
 app.use("/uploads", express.static(path.join(__dirname, "src/uploads")));
 
 app.use("/api", logRoute);

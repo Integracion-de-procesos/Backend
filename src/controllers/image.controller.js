@@ -23,7 +23,6 @@ const subirImagen = async (req, res) => {
             });
         }
 
-        // Imagen previa
         const imagenPrev = await Imagen.findOne({ where: { idUsuario } });
         if (imagenPrev) {
             if (fs.existsSync(imagenPrev.ruta)) {
@@ -32,9 +31,8 @@ const subirImagen = async (req, res) => {
             await imagenPrev.destroy();
         }
 
-        // 🔹 Guardar nueva imagen con su extensión original
         const ext = path.extname(req.file.originalname);
-        const nombreArchivo = `IMG_${idUsuario}${ext}`;
+        const nombreArchivo = `IMG_${idUsuario}_${Date.now()}${ext}`;
         const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
 
         fs.renameSync(req.file.path, rutaDestino);
