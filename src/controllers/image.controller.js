@@ -11,8 +11,10 @@ const subirImagen = async (req, res) => {
                 message: "No se subió ninguna imagen",
             });
         }
+
         const { idUsuario } = req.body;
         const usuario = await Usuario.findByPk(idUsuario);
+
         if (!usuario) {
             fs.unlinkSync(req.file.path);
             return res.status(404).json({
@@ -21,6 +23,7 @@ const subirImagen = async (req, res) => {
             });
         }
 
+        // Imagen previa
         const imagenPrev = await Imagen.findOne({ where: { idUsuario } });
         if (imagenPrev) {
             if (fs.existsSync(imagenPrev.ruta)) {
@@ -29,9 +32,13 @@ const subirImagen = async (req, res) => {
             await imagenPrev.destroy();
         }
 
-        const nombreArchivo = `IMG_${idUsuario}${path.extname(req.file.originalname)}`;
+        // 🔹 Guardar nueva imagen con su extensión original
+        const ext = path.extname(req.file.originalname);
+        const nombreArchivo = `IMG_${idUsuario}${ext}`;
         const rutaDestino = path.join(__dirname, "..", "uploads", nombreArchivo);
+
         fs.renameSync(req.file.path, rutaDestino);
+
         await Imagen.create({
             idUsuario,
             nombreArchivo,
@@ -50,7 +57,6 @@ const subirImagen = async (req, res) => {
         });
     }
 };
-
 
 const encontrarImagen = async (req, res) => {
     try {
