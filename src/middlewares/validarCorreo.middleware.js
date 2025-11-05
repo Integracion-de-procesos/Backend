@@ -1,12 +1,17 @@
 const { enviarCodigoVerificacion } = require("../services/email.service");
 const crypto = require("crypto");
-const CodigoVerificacion = require("../models/code.model")
+const CodigoVerificacion = require("../models/code.model");
+const Usuario = require("../models/user.model");
 
 exports.enviarCodigo = async (req, res) => {
     try {
         const { correoElectronico } = req.body;
+
         if (!correoElectronico)
             return res.status(400).json({ success: false, message: "Correo requerido" });
+        const usuario = await Usuario.findOne({ where: { correoElectronico } })
+        if (usuario)
+            return res.status(400).json({ success: false, message: "El usuario ya se encuentra registrado" })
         // Generar código aleatorio
         const codigo = crypto.randomInt(100000, 999999).toString();
         // Calcular fecha de expiración (10 minutos)
