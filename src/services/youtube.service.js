@@ -69,11 +69,21 @@ const YouTubeService = {
 
             return videos;
         } catch (error) {
-            console.error("Error en buscarVideos:", error.response?.data || error.message);
-            throw new Error("No se pudieron obtener videos de YouTube");
+            const reason = error.response?.data?.error?.errors?.[0]?.reason || null;
+            let message = "Error al consultar la API de YouTube.";
+
+            if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
+                message = "Límite de créditos de la API de YouTube alcanzado. Inténtalo más tarde.";
+            } else if (reason === "userRateLimitExceeded") {
+                message = "Demasiadas solicitudes en poco tiempo. Espera un momento e inténtalo de nuevo.";
+            } else if (error.response?.status === 403) {
+                message = "Acceso denegado o límites de uso alcanzados.";
+            }
+
+            return { status: 403, message };
         }
     },
-    
+
     // Obtencion de info de video por ID
     async obtenerVideoPorId(videoId) {
         try {
@@ -119,7 +129,18 @@ const YouTubeService = {
                 publicado
             };
         } catch (error) {
-            throw new Error("No se pudo obtener el video de YouTube");
+            const reason = error.response?.data?.error?.errors?.[0]?.reason || null;
+            let message = "Error al consultar la API de YouTube.";
+
+            if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
+                message = "Límite de créditos de la API de YouTube alcanzado. Inténtalo más tarde.";
+            } else if (reason === "userRateLimitExceeded") {
+                message = "Demasiadas solicitudes en poco tiempo. Espera un momento e inténtalo de nuevo.";
+            } else if (error.response?.status === 403) {
+                message = "Acceso denegado o límites de uso alcanzados.";
+            }
+
+            return { status: 403, message };
         }
     },
 
@@ -197,7 +218,18 @@ const YouTubeService = {
 
             return videos;
         } catch (error) {
-            throw new Error("No se pudieron obtener videos cercanos");
+            const reason = error.response?.data?.error?.errors?.[0]?.reason || null;
+            let message = "Error al consultar la API de YouTube.";
+
+            if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
+                message = "Límite de créditos de la API de YouTube alcanzado. Inténtalo más tarde.";
+            } else if (reason === "userRateLimitExceeded") {
+                message = "Demasiadas solicitudes en poco tiempo. Espera un momento e inténtalo de nuevo.";
+            } else if (error.response?.status === 403) {
+                message = "Acceso denegado o límites de uso alcanzados.";
+            }
+
+            return { status: 403, message };
         }
     },
 
@@ -275,12 +307,18 @@ const YouTubeService = {
 
             return videos;
         } catch (error) {
-            console.error("Error al buscar videos populares:", {
-                status: error.response?.status,
-                data: error.response?.data,
-                message: error.message,
-            });
-            throw new Error("No se pudieron obtener videos populares");
+            const reason = error.response?.data?.error?.errors?.[0]?.reason || null;
+            let message = "Error al consultar la API de YouTube.";
+
+            if (reason === "quotaExceeded" || reason === "dailyLimitExceeded") {
+                message = "Límite de créditos de la API de YouTube alcanzado. Inténtalo más tarde.";
+            } else if (reason === "userRateLimitExceeded") {
+                message = "Demasiadas solicitudes en poco tiempo. Espera un momento e inténtalo de nuevo.";
+            } else if (error.response?.status === 403) {
+                message = "Acceso denegado o límites de uso alcanzados.";
+            }
+
+            return { status: 403, message };
         }
     }
 
