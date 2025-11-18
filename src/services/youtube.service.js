@@ -262,7 +262,7 @@ const YouTubeService = {
             const videoIds = items.map((item) => item.id.videoId).join(",");
             const channelIds = [...new Set(items.map((item) => item.snippet.channelId))].join(",");
 
-            // 3️⃣ Obtener estadísticas de videos (vistas, likes, duración)
+            // Estadísticas de videos (vistas, likes, duración)
             const videosResponse = await axios.get(`${BASE_URL}/videos`, {
                 params: {
                     part: "snippet,statistics,contentDetails",

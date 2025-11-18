@@ -32,7 +32,7 @@ Usuario.init(
         },
         contraseña: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
             validate: {
                 len: {
                     args: [8],

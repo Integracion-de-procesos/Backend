@@ -3,7 +3,7 @@ const Usuario = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const Imagen = require("../models/image.model");
 
-const TOKEN_SECRET = process.env.TOKEN_SECRET || "clave_secreta_temporal";
+const TOKEN_SECRET = process.env.TOKEN_SECRET;
 
 // Inicio de sesion
 const generar = async (req, res) => {
@@ -11,13 +11,12 @@ const generar = async (req, res) => {
         const { correoElectronico, contraseña } = req.body;
 
         // Validar que vengan ambos campos
-        if (!correoElectronico || !contraseña) {
+        if (!correoElectronico) {
             return res.status(400).json({
                 success: false,
                 mensaje: "Faltan campos requeridos",
             });
         }
-
         // Buscar usuario por correo
         const usuario = await Usuario.findOne({
             where: { correoElectronico },
@@ -27,14 +26,12 @@ const generar = async (req, res) => {
                 attributes: ["nombreArchivo", "ruta"],
             },
         });
-
         if (!usuario) {
             return res.status(404).json({
                 success: false,
                 mensaje: "Usuario no encontrado",
             });
         }
-
         // Comparar contraseñas
         const valida = await bcrypt.compare(contraseña, usuario.contraseña);
         if (!valida) {
