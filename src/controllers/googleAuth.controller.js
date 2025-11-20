@@ -69,7 +69,7 @@ exports.loginGoogle = async (req, res) => {
         if (usuario.perfil) {
             // Imagen local subida por el usuario
             rutaImagen = `https://integracion.test-drive.org/uploads/${usuario.perfil.nombreArchivo}`;
-        } else if (picture) {
+        } else if (photo) {
             // Imagen de Google
             rutaImagen = photo;
         } else {
