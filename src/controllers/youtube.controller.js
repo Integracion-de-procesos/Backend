@@ -23,7 +23,6 @@ const obtenerVideo = async (req, res) => {
 const buscarVideosCercanos = async (req, res) => {
     try {
         const { q, lat, lon } = req.query;
-        console.log(`q: ${q} / lat: ${lat} / lon: ${lon}`)
         const videos = await YouTubeService.buscarVideosPorUbicacion(q, lat, lon);
         res.json({ success: true, data: videos });
     } catch (error) {
