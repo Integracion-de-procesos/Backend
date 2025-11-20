@@ -12,7 +12,6 @@ const {
   videoReferenceRoute,
   youtubeRoutes,
   imageRoutes,
-  googleRoute,
 } = require("./src/routes/index.route");
 
 // modelos
@@ -55,7 +54,6 @@ app.use("/api/historiales", validarToken, recordRoute);
 app.use("/api/referencias", validarToken, videoReferenceRoute);
 app.use("/api/youtube", validarToken, youtubeRoutes);
 app.use("/api/images", validarToken, imageRoutes);
-//router.post("/auth/google", googleRoute);
 
 sequelize
   .sync({ alter: true })
