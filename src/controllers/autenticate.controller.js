@@ -23,7 +23,7 @@ const generar = async (req, res) => {
             include: {
                 model: Imagen,
                 as: "perfil",
-                attributes: ["nombreArchivo", "ruta"],
+                attributes: ["nombreArchivo"],
             },
         });
         if (!usuario) {
@@ -68,9 +68,9 @@ const generar = async (req, res) => {
                 idUsuario: usuario.idUsuario,
                 nombres: usuario.nombres,
                 correoElectronico: usuario.correoElectronico,
-                imagen: usuario.perfil ? {
-                    nombreArchivo: usuario.perfil.nombreArchivo,
-                } : null,
+                rutaImagen: usuario.perfil ?
+                    `https://integracion.test-drive.org/uploads/${usuario.perfil.nombreArchivo}`
+                    : `https://integracion.test-drive.org/uploads/profile.png`,
             },
         });
     } catch (error) {

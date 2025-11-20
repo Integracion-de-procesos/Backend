@@ -1,6 +1,7 @@
 const { OAuth2Client } = require("google-auth-library");
 const jwt = require("jsonwebtoken");
 const Usuario = require("../models/user.model");
+const Imagen = require("../models/image.model"); // Importante para incluir la imagen
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
@@ -25,11 +26,16 @@ exports.loginGoogle = async (req, res) => {
         const payload = ticket.getPayload();
 
         // Datos del usuario proporcionados por Google
-        const { email, name } = payload;
+        const { email, name, picture } = payload;
 
-        // Buscar usuario por correo
+        // Buscar usuario por correo, incluir imagen local si existe
         let usuario = await Usuario.findOne({
             where: { correoElectronico: email },
+            include: {
+                model: Imagen,
+                as: "perfil",
+                attributes: ["nombreArchivo"],
+            },
         });
 
         // Si no existe, crearlo
@@ -56,8 +62,20 @@ exports.loginGoogle = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
-            maxAge: 24 * 60 * 60 * 1000, // 1 día
+            maxAge: 24 * 60 * 60 * 1000,
         });
+
+        let rutaImagen;
+        if (usuario.perfil) {
+            // Imagen local subida por el usuario
+            rutaImagen = `https://integracion.test-drive.org/uploads/${usuario.perfil.nombreArchivo}`;
+        } else if (picture) {
+            // Imagen de Google
+            rutaImagen = picture;
+        } else {
+            // Imagen default local
+            rutaImagen = `https://integracion.test-drive.org/uploads/profile.png`;
+        }
 
         // Respuesta al cliente
         return res.status(200).json({
@@ -68,6 +86,7 @@ exports.loginGoogle = async (req, res) => {
                 idUsuario: usuario.idUsuario,
                 nombres: usuario.nombres,
                 correoElectronico: usuario.correoElectronico,
+                rutaImagen,
             },
         });
 
