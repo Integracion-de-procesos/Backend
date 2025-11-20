@@ -26,7 +26,7 @@ exports.loginGoogle = async (req, res) => {
         const payload = ticket.getPayload();
 
         // Datos del usuario proporcionados por Google
-        const { email, name, picture } = payload;
+        const { email, name, photo } = payload;
 
         // Buscar usuario por correo, incluir imagen local si existe
         let usuario = await Usuario.findOne({
@@ -71,7 +71,7 @@ exports.loginGoogle = async (req, res) => {
             rutaImagen = `https://integracion.test-drive.org/uploads/${usuario.perfil.nombreArchivo}`;
         } else if (picture) {
             // Imagen de Google
-            rutaImagen = picture;
+            rutaImagen = photo;
         } else {
             // Imagen default local
             rutaImagen = `https://integracion.test-drive.org/uploads/profile.png`;
