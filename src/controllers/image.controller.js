@@ -47,7 +47,7 @@ const subirImagen = async (req, res) => {
             success: true,
             message: "Imagen subida correctamente",
             data: {
-                nombreArchivo: nombreArchivo
+                rutaImagen: `https://integracion.test-drive.org/uploads/${nombreArchivo}`
             }
         });
     } catch (error) {
@@ -55,6 +55,9 @@ const subirImagen = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error.message,
+            data: {
+                rutaImagen: `https://integracion.test-drive.org/uploads/profile.png`
+            }
         });
     }
 };
