@@ -210,7 +210,6 @@ const YouTubeService = {
                         likes: video.statistics.likeCount,
                         duracion: video.contentDetails.duration,
                         canalImagen,
-                        ubicacion: { lat, lon, radio },
                         publicado
                     };
                 })
